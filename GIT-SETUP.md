@@ -1,11 +1,14 @@
 # Git-Zugang für PDAcademy
 
+**Hinweis:** Das Remote ist auf **HTTPS** eingestellt (`https://github.com/superflyer82/academy.git`). So funktioniert der Push auch ohne SSH-Key (z. B. unter macOS Tahoe).
+
 ## Sind Zugangsdaten nötig?
 
 - **Commit** (lokal): Du brauchst **keine** GitHub-Zugangsdaten. Nur deine Git-Identität (Name + E-Mail) für die Commit-Autorenangabe.
 - **Push** (Hochladen zu GitHub): Dafür ist eine **Authentifizierung** nötig.
 
 ## Einmalige Einrichtung
+
 
 ### 1. Git-Identität (für Commits)
 
@@ -62,3 +65,15 @@ git push origin main
 ```
 
 Beim ersten Push mit HTTPS: Benutzername (z.B. `superflyer82`) und **Personal Access Token** als Passwort eingeben – danach merkt sich die Keychain die Daten.
+
+---
+
+## Wenn „Permission denied (publickey)“ auftritt
+
+- Das Remote ist bereits auf **HTTPS** umgestellt – Push läuft ohne SSH.
+- **Push bitte in deinem eigenen Terminal ausführen** (Cursor-Terminal oder macOS Terminal), nicht in einer Umgebung ohne deine Anmeldedaten:
+  ```bash
+  cd /Users/michael/Documents/CursorAI/Projekte/PDAcademy
+  git push -u origin main
+  ```
+- Beim ersten Mal: Benutzername = dein GitHub-Benutzername, Passwort = **Personal Access Token** (siehe Option A oben). Danach speichert die Keychain die Daten.

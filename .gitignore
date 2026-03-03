@@ -11,6 +11,8 @@ python_packages/
 .env.local
 .env.*.local
 sftp-credentials.academy.newlink.de.json
+github_pdacademy
+github_pdacademy.pub
 
 # IDE & OS (Spec Kit: Agent-Folder kann Credentials enthalten)
 .idea/
