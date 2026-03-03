@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* PD Corporate Identity (pd-g.de): Navy als Basis, dezente Blautöne */
+    --background: 210 25% 98%;
+    --foreground: 210 45% 15%;
+    --muted: 210 25% 94%;
+    --muted-foreground: 210 20% 40%;
+    --border: 210 25% 88%;
+    --input: 210 25% 92%;
+    --ring: 210 100% 20%;
+    --pd-blue: 210 100% 20%;
+    --pd-blue-light: 210 100% 28%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  a:not([class]) {
+    @apply text-pd-blue underline underline-offset-2 hover:text-pd-blue-light;
+  }
+}
+
+/* Mobile First: Basis für kleine Viewports */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Fokus sichtbar für Tastatur (WCAG 2.1) */
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-pd-blue;
+}

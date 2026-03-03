@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+vendor/
+__pycache__/
+*.pyc
+.python_packages/
+python_packages/
+
+# Environment & Secrets (niemals nach GitHub pushen!)
+.env
+.env.local
+.env.*.local
+sftp-credentials.academy.newlink.de.json
+
+# IDE & OS (Spec Kit: Agent-Folder kann Credentials enthalten)
+.idea/
+.cursor/
+.vscode/sftp.json
+.DS_Store
+
+# Build / Logs
+.next/
+dist/
+build/
+out/
+*.log
