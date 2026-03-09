@@ -1,3 +1,0 @@
-# PDAcademy – Netcup Webhosting
-# index.php wird zuerst ausgeliefert; bei Bedarf RewriteBase anpassen (z. B. /pdacademy/)
-DirectoryIndex index.php index.html
