@@ -1,7 +1,8 @@
-export enum StaffRole {
-  STAFF = 'STAFF',
-  ADMIN = 'ADMIN',
-}
+export const StaffRole = {
+  STAFF: 'STAFF',
+  ADMIN: 'ADMIN',
+} as const;
+export type StaffRole = (typeof StaffRole)[keyof typeof StaffRole];
 
 export interface StaffProfile {
   id: string;

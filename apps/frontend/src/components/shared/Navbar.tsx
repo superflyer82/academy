@@ -12,7 +12,7 @@ export function Navbar() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const isStaff = user?.role && ['ADMIN', 'STAFF', 'VIEWER'].includes(user.role as string);
+  const isStaff = user?.type === 'staff';
   const isCitizen = !isStaff;
 
   const handleLogout = async () => {

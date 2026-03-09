@@ -25,7 +25,7 @@ export default function StaffLogin() {
     setLoading(true);
     try {
       const res = await staffLogin({ email, password });
-      setAuth(res.accessToken, res.user);
+      setAuth(res.accessToken, { ...res.user, type: 'staff' } as Parameters<typeof setAuth>[1]);
       navigate('/dashboard');
     } catch {
       setError(t('auth.invalidCredentials'));

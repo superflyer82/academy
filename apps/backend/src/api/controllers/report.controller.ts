@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import * as reportService from '../../services/report.service';
 import * as notificationService from '../../services/notification.service';
-import { ReportStatus } from '@maengelmelder/shared-types';
+import { ReportPriority, ReportStatus } from '@maengelmelder/shared-types';
 
 const createReportSchema = z.object({
   categoryId: z.string().uuid(),
@@ -25,6 +25,11 @@ const reportFiltersSchema = z.object({
   radius: z.coerce.number().int().optional(),
 });
 
+function paramId(req: Request, name: string): string {
+  const v = req.params[name];
+  return Array.isArray(v) ? v[0] : v;
+}
+
 export async function createReport(req: Request, res: Response): Promise<void> {
   const data = createReportSchema.parse(req.body);
   const photos = (req.files as Express.Multer.File[]) ?? [];
@@ -41,15 +46,15 @@ export async function getPublicReports(req: Request, res: Response): Promise<voi
 }
 
 export async function getReportById(req: Request, res: Response): Promise<void> {
-  const report = await reportService.getReportById(req.params.id);
+  const report = await reportService.getReportById(paramId(req, 'id'));
   if (!report) { res.status(404).json({ error: 'Not Found' }); return; }
   res.json(report);
 }
 
 export async function trackReport(req: Request, res: Response): Promise<void> {
-  const report = await reportService.getReportByToken(req.params.publicToken);
+  const report = await reportService.getReportByToken(paramId(req, 'publicToken'));
   if (!report) { res.status(404).json({ error: 'Not Found' }); return; }
-  res.json({ id: report.id, status: report.status, category: report.category, createdAt: report.createdAt, statusHistory: report.statusHistory });
+  res.json({ id: report.id, status: report.status, category: report.category, createdAt: report.createdAt, updatedAt: report.updatedAt, statusHistory: report.statusHistory });
 }
 
 export async function getNearbyReports(req: Request, res: Response): Promise<void> {
@@ -64,16 +69,16 @@ export async function getNearbyReports(req: Request, res: Response): Promise<voi
 }
 
 export async function getDashboardReportById(req: Request, res: Response): Promise<void> {
-  const report = await reportService.getDashboardReportById(req.params.id);
+  const report = await reportService.getDashboardReportById(paramId(req, 'id'));
   if (!report) { res.status(404).json({ error: 'Not Found' }); return; }
   res.json(report);
 }
 
 export async function getDashboardReports(req: Request, res: Response): Promise<void> {
-  const filters = z.object({
+  const raw = z.object({
     status: z.nativeEnum(ReportStatus).optional(),
     categoryId: z.string().uuid().optional(),
-    priority: z.string().optional(),
+    priority: z.nativeEnum(ReportPriority).optional(),
     assignedToId: z.string().uuid().optional(),
     dateFrom: z.string().optional(),
     dateTo: z.string().optional(),
@@ -84,7 +89,7 @@ export async function getDashboardReports(req: Request, res: Response): Promise<
     sortDir: z.enum(['asc', 'desc']).optional(),
   }).parse(req.query);
 
-  const result = await reportService.getDashboardReports(filters);
+  const result = await reportService.getDashboardReports(raw);
   res.json(result);
 }
 
@@ -95,7 +100,7 @@ export async function updateStatus(req: Request, res: Response): Promise<void> {
     sendEmail: z.boolean().default(true),
   }).parse(req.body);
 
-  const updated = await reportService.updateReportStatus(req.params.id, status, req.user!.sub, note);
+  const updated = await reportService.updateReportStatus(paramId(req, 'id'), status, req.user!.sub, note);
 
   if (sendEmail && updated.reporterEmail && updated.notifyOnUpdate) {
     await notificationService.notifyStatusChange({
@@ -111,13 +116,13 @@ export async function updateStatus(req: Request, res: Response): Promise<void> {
 
 export async function assignReport(req: Request, res: Response): Promise<void> {
   const { assignedToId } = z.object({ assignedToId: z.string().uuid().nullable() }).parse(req.body);
-  const updated = await reportService.assignReport(req.params.id, assignedToId);
+  const updated = await reportService.assignReport(paramId(req, 'id'), assignedToId);
   res.json(updated);
 }
 
 export async function addComment(req: Request, res: Response): Promise<void> {
   const { text } = z.object({ text: z.string().min(1).max(5000) }).parse(req.body);
-  const comment = await reportService.addInternalComment(req.params.id, req.user!.sub, text);
+  const comment = await reportService.addInternalComment(paramId(req, 'id'), req.user!.sub, text);
   res.status(201).json(comment);
 }
 

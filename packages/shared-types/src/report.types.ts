@@ -1,17 +1,19 @@
-export enum ReportStatus {
-  OPEN = 'OPEN',
-  IN_PROGRESS = 'IN_PROGRESS',
-  RESOLVED = 'RESOLVED',
-  REJECTED = 'REJECTED',
-  PENDING_RESPONSE = 'PENDING_RESPONSE',
-}
+export const ReportStatus = {
+  OPEN: 'OPEN',
+  IN_PROGRESS: 'IN_PROGRESS',
+  RESOLVED: 'RESOLVED',
+  REJECTED: 'REJECTED',
+  PENDING_RESPONSE: 'PENDING_RESPONSE',
+} as const;
+export type ReportStatus = (typeof ReportStatus)[keyof typeof ReportStatus];
 
-export enum ReportPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  URGENT = 'URGENT',
-}
+export const ReportPriority = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  URGENT: 'URGENT',
+} as const;
+export type ReportPriority = (typeof ReportPriority)[keyof typeof ReportPriority];
 
 export interface ReportPublic {
   id: string;
@@ -38,6 +40,7 @@ export interface ReportTrack {
   status: ReportStatus;
   category?: CategoryBasic;
   createdAt: string;
+  updatedAt: string;
   statusHistory: StatusEntry[];
 }
 

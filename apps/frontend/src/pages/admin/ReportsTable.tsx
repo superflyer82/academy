@@ -60,7 +60,7 @@ export default function ReportsTable() {
 
   const toggleSelectAll = () => {
     if (!data) return;
-    const allIds = data.items.map((r) => r.id);
+    const allIds = data.data.map((r) => r.id);
     setSelectedIds(selectedIds.length === allIds.length ? [] : allIds);
   };
 
@@ -121,7 +121,7 @@ export default function ReportsTable() {
                 <TableHead className="w-10">
                   <input
                     type="checkbox"
-                    checked={!!data && selectedIds.length === data.items.length && data.items.length > 0}
+                    checked={!!data && selectedIds.length === data.data.length && data.data.length > 0}
                     onChange={toggleSelectAll}
                     aria-label={t('dashboard.selectAll')}
                   />
@@ -143,14 +143,14 @@ export default function ReportsTable() {
                   </TableCell>
                 </TableRow>
               )}
-              {!isLoading && data?.items.length === 0 && (
+              {!isLoading && data?.data.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     {t('common.noResults')}
                   </TableCell>
                 </TableRow>
               )}
-              {data?.items.map((r) => (
+              {data?.data.map((r) => (
                 <TableRow key={r.id} data-state={selectedIds.includes(r.id) ? 'selected' : undefined}>
                   <TableCell>
                     <input

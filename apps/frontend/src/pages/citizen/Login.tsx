@@ -24,7 +24,7 @@ export default function CitizenLogin() {
     setLoading(true);
     try {
       const res = await citizenLogin({ email, password });
-      setAuth(res.accessToken, res.user);
+      setAuth(res.accessToken, { ...res.user, type: 'citizen' } as Parameters<typeof setAuth>[1]);
       navigate('/meine-meldungen');
     } catch {
       setError(t('auth.invalidCredentials'));

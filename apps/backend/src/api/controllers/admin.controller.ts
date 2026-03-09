@@ -44,7 +44,7 @@ export async function updateStaff(req: Request, res: Response): Promise<void> {
   }).parse(req.body);
 
   const updated = await prisma.staffUser.update({
-    where: { id: req.params.id },
+    where: { id: (req.params['id'] as string) },
     data,
     select: { id: true, email: true, name: true, role: true, department: true, isActive: true },
   });

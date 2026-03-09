@@ -174,7 +174,7 @@ export async function updateReportStatus(
     [ReportStatus.REJECTED]: [],
   };
 
-  if (!validTransitions[report.status].includes(newStatus)) {
+  if (!validTransitions[report.status as ReportStatus].includes(newStatus)) {
     throw new Error(`Invalid status transition: ${report.status} → ${newStatus}`);
   }
 

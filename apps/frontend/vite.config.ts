@@ -7,7 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@maengelmelder/shared-types': path.resolve(__dirname, '../../packages/shared-types/src'),
+      '@maengelmelder/shared-types': path.resolve(__dirname, '../../packages/shared-types/dist/esm/index.js'),
     },
   },
   server: {

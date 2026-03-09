@@ -43,13 +43,12 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 function RequireStaff({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
   if (!user) return <Navigate to="/dashboard/login" replace />;
-  const isStaff = ['ADMIN', 'STAFF', 'VIEWER'].includes(user.role as string);
+  const isStaff = user.type === 'staff';
   if (!isStaff) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
 // Pages without Navbar (full-screen layouts)
-const FULL_SCREEN_ROUTES = ['/dashboard'];
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (

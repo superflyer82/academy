@@ -8,9 +8,9 @@
     "start": "node dist/index.js",
     "test": "jest --runInBand",
     "lint": "eslint src",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy",
+    "db:generate": "prisma generate --schema=src/prisma/schema.prisma",
+    "db:migrate": "prisma migrate dev --schema=src/prisma/schema.prisma",
+    "db:migrate:deploy": "prisma migrate deploy --schema=src/prisma/schema.prisma",
     "db:seed": "tsx src/prisma/seed.ts"
   },
   "dependencies": {
@@ -53,5 +53,8 @@
     "ts-jest": "^29.2.5",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
+  },
+  "prisma": {
+    "schema": "src/prisma/schema.prisma"
   }
 }

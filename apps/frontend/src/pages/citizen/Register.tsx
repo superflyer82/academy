@@ -29,7 +29,7 @@ export default function Register() {
     setLoading(true);
     try {
       const res = await citizenRegister({ name, email, password });
-      setAuth(res.accessToken, res.user);
+      setAuth(res.accessToken, { ...res.user, type: 'citizen' } as Parameters<typeof setAuth>[1]);
       navigate('/meine-meldungen');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;

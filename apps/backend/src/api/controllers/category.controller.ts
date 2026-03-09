@@ -34,7 +34,7 @@ export async function createCategory(req: Request, res: Response): Promise<void>
 export async function updateCategory(req: Request, res: Response): Promise<void> {
   const data = categorySchema.partial().parse(req.body);
   const category = await prisma.category.update({
-    where: { id: req.params.id },
+    where: { id: Array.isArray(req.params['id']) ? req.params['id'][0] : req.params['id'] },
     data,
   });
   res.json(category);
@@ -42,7 +42,7 @@ export async function updateCategory(req: Request, res: Response): Promise<void>
 
 export async function deleteCategory(req: Request, res: Response): Promise<void> {
   await prisma.category.update({
-    where: { id: req.params.id },
+    where: { id: Array.isArray(req.params['id']) ? req.params['id'][0] : req.params['id'] },
     data: { isActive: false },
   });
   res.status(204).send();

@@ -82,7 +82,7 @@ export default function ReportsList() {
       {isLoading && <p className="text-center py-8 text-muted-foreground">{t('common.loading')}</p>}
 
       <div className="space-y-3">
-        {data?.items.map((r) => (
+        {data?.data.map((r) => (
           <Card key={r.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <Link to={`/meldungen/${r.id}`} className="block">
@@ -110,7 +110,7 @@ export default function ReportsList() {
         ))}
       </div>
 
-      {!isLoading && data?.items.length === 0 && (
+      {!isLoading && data?.data.length === 0 && (
         <p className="text-center py-8 text-muted-foreground">{t('common.noResults')}</p>
       )}
 

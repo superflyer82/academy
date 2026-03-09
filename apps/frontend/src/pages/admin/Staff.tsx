@@ -22,7 +22,7 @@ export default function Staff() {
   });
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ email: '', name: '', role: StaffRole.STAFF, department: '' });
+  const [form, setForm] = useState<{ email: string; name: string; role: StaffRole; department: string }>({ email: '', name: '', role: StaffRole.STAFF, department: '' });
 
   const createMutation = useMutation({
     mutationFn: () => createStaff(form),
@@ -36,7 +36,6 @@ export default function Staff() {
   const ROLE_LABELS: Record<StaffRole, string> = {
     [StaffRole.ADMIN]: 'Administrator',
     [StaffRole.STAFF]: 'Mitarbeiter',
-    [StaffRole.VIEWER]: 'Betrachter',
   };
 
   return (

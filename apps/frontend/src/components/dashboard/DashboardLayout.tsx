@@ -42,7 +42,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     navigate('/dashboard/login');
   };
 
-  const isAdmin = user?.role === 'ADMIN';
+  const isAdmin = user?.type === 'staff' && (user as import('@maengelmelder/shared-types').StaffProfile & { type: 'staff' }).role === 'ADMIN';
   const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
 
   const Sidebar = () => (

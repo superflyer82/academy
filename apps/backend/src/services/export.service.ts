@@ -39,5 +39,5 @@ export async function exportXlsx(): Promise<Buffer> {
     sheet.getRow(1).font = { bold: true };
   }
 
-  return (await workbook.xlsx.writeBuffer()) as Buffer;
+  return (await workbook.xlsx.writeBuffer()) as unknown as Buffer;
 }
