@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ReportStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  REJECTED
+  PENDING_RESPONSE
+}
+
+enum ReportPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum StaffRole {
+  STAFF
+  ADMIN
+}
+
+model Report {
+  id              String         @id @default(uuid())
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  category        Category       @relation(fields: [categoryId], references: [id])
+  categoryId      String
+  description     String?
+  status          ReportStatus   @default(OPEN)
+  priority        ReportPriority @default(LOW)
+  lat             Float
+  lng             Float
+  address         String?
+  reporterName    String?
+  reporterEmail   String?
+  isAnonymous     Boolean        @default(true)
+  notifyOnUpdate  Boolean        @default(false)
+  publicToken     String         @unique @default(uuid())
+  assignedTo      StaffUser?     @relation(fields: [assignedToId], references: [id])
+  assignedToId    String?
+  citizen         Citizen?       @relation(fields: [citizenId], references: [id])
+  citizenId       String?
+  photos          Photo[]
+  comments        InternalComment[]
+  statusHistory   StatusEntry[]
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([lat, lng])
+  @@index([createdAt])
+}
+
+model Category {
+  id                    String    @id @default(uuid())
+  name                  String
+  icon                  String
+  color                 String    @default("#6B7280")
+  responsibleDepartment String
+  targetResolutionDays  Int
+  isActive              Boolean   @default(true)
+  sortOrder             Int       @default(0)
+  reports               Report[]
+}
+
+model StaffUser {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         StaffRole @default(STAFF)
+  department   String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+  assignedReports Report[]
+  comments        InternalComment[]
+  statusEntries   StatusEntry[]
+}
+
+model Citizen {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  passwordHash   String
+  name           String
+  emailVerified  Boolean   @default(false)
+  notifyOnUpdate Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  reports        Report[]
+}
+
+model Photo {
+  id        String   @id @default(uuid())
+  url       String
+  filename  String
+  mimeType  String
+  sizeBytes Int
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  reportId  String
+  createdAt DateTime @default(now())
+}
+
+model InternalComment {
+  id        String    @id @default(uuid())
+  text      String
+  report    Report    @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  reportId  String
+  author    StaffUser @relation(fields: [authorId], references: [id])
+  authorId  String
+  createdAt DateTime  @default(now())
+}
+
+model StatusEntry {
+  id         String        @id @default(uuid())
+  fromStatus ReportStatus?
+  toStatus   ReportStatus
+  note       String?
+  report     Report        @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  reportId   String
+  author     StaffUser?    @relation(fields: [authorId], references: [id])
+  authorId   String?
+  createdAt  DateTime      @default(now())
+}
+
+model AppConfig {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

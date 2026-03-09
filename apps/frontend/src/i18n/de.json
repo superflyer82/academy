@@ -1,0 +1,106 @@
+{
+  "common": {
+    "loading": "Wird geladen...",
+    "error": "Fehler",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "back": "Zurück",
+    "next": "Weiter",
+    "submit": "Absenden",
+    "yes": "Ja",
+    "no": "Nein",
+    "required": "Pflichtfeld",
+    "optional": "Optional",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "export": "Exportieren",
+    "noResults": "Keine Ergebnisse gefunden"
+  },
+  "nav": {
+    "home": "Startseite",
+    "newReport": "Meldung einreichen",
+    "map": "Karte",
+    "myReports": "Meine Meldungen",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "dashboard": "Dashboard",
+    "admin": "Verwaltung"
+  },
+  "report": {
+    "title": "Mängel melden",
+    "category": "Kategorie",
+    "selectCategory": "Kategorie auswählen",
+    "location": "Standort",
+    "locationHint": "Klicken Sie auf die Karte oder geben Sie eine Adresse ein",
+    "gpsButton": "GPS nutzen",
+    "description": "Beschreibung",
+    "descriptionPlaceholder": "Was genau ist der Mangel? (optional)",
+    "photos": "Fotos",
+    "photosHint": "Max. 3 Fotos (JPEG, PNG, WebP)",
+    "contact": "Kontaktdaten",
+    "contactHint": "Für Statusbenachrichtigungen (optional, anonym möglich)",
+    "name": "Ihr Name",
+    "email": "Ihre E-Mail-Adresse",
+    "notify": "E-Mail-Benachrichtigungen bei Statusänderungen",
+    "summary": "Zusammenfassung",
+    "confirmSubmit": "Meldung absenden",
+    "success": "Meldung erfolgreich eingereicht!",
+    "ticketId": "Ihre Ticket-ID",
+    "trackHint": "Mit dieser ID können Sie den Status Ihrer Meldung verfolgen.",
+    "duplicate": "Ähnliche Meldung vorhanden",
+    "duplicateHint": "Es gibt bereits ähnliche Meldungen in Ihrer Nähe. Trotzdem absenden?",
+    "steps": {
+      "1": "Kategorie",
+      "2": "Standort",
+      "3": "Details",
+      "4": "Zusammenfassung"
+    }
+  },
+  "status": {
+    "OPEN": "Eingegangen",
+    "IN_PROGRESS": "In Bearbeitung",
+    "RESOLVED": "Gelöst",
+    "REJECTED": "Abgelehnt",
+    "PENDING_RESPONSE": "Rückfrage"
+  },
+  "priority": {
+    "LOW": "Niedrig",
+    "MEDIUM": "Mittel",
+    "HIGH": "Hoch",
+    "URGENT": "Dringend"
+  },
+  "map": {
+    "title": "Aktuelle Meldungen",
+    "filterCategory": "Kategorie filtern",
+    "filterStatus": "Status filtern",
+    "allCategories": "Alle Kategorien",
+    "allStatuses": "Alle Status"
+  },
+  "dashboard": {
+    "title": "Verwaltungs-Dashboard",
+    "reports": "Meldungen",
+    "newReports": "Neue Meldungen",
+    "assignTo": "Zuweisen",
+    "setPriority": "Priorität setzen",
+    "changeStatus": "Status ändern",
+    "internalComment": "Interne Notiz",
+    "statusHistory": "Statusverlauf",
+    "bulkActions": "Massenbearbeitung",
+    "selectAll": "Alle auswählen",
+    "stats": "Statistiken"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "name": "Vollständiger Name",
+    "forgotPassword": "Passwort vergessen?",
+    "resetPassword": "Passwort zurücksetzen",
+    "staffLogin": "Mitarbeiter-Login",
+    "invalidCredentials": "Ungültige Anmeldedaten",
+    "emailAlreadyRegistered": "E-Mail bereits registriert"
+  }
+}
