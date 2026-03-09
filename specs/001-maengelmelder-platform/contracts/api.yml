@@ -1,0 +1,714 @@
+openapi: 3.0.3
+info:
+  title: Mängelmelder Musterhausen API
+  version: 1.0.0
+  description: REST API für die Bürger-Meldeplattform der Stadt Musterhausen
+
+servers:
+  - url: /api/v1
+
+tags:
+  - name: reports
+    description: Bürger-Meldungen
+  - name: categories
+    description: Mängelkategorien
+  - name: auth
+    description: Authentifizierung (Bürger + Mitarbeiter)
+  - name: dashboard
+    description: Internes Verwaltungs-Dashboard
+  - name: admin
+    description: Admin-Konfiguration
+
+paths:
+  # ── PUBLIC: Reports ──────────────────────────────────────────────
+  /reports:
+    get:
+      tags: [reports]
+      summary: Alle öffentlichen Meldungen abrufen
+      parameters:
+        - name: categoryId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: status
+          in: query
+          schema: { type: string, enum: [OPEN, IN_PROGRESS, RESOLVED] }
+        - name: lat
+          in: query
+          schema: { type: number }
+        - name: lng
+          in: query
+          schema: { type: number }
+        - name: radius
+          in: query
+          description: Radius in Metern
+          schema: { type: integer, default: 500 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50, maximum: 200 }
+      responses:
+        '200':
+          description: Liste öffentlicher Meldungen
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ReportPublic' }
+                  total: { type: integer }
+                  page: { type: integer }
+                  totalPages: { type: integer }
+
+    post:
+      tags: [reports]
+      summary: Neue Meldung einreichen
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [categoryId, lat, lng]
+              properties:
+                categoryId: { type: string, format: uuid }
+                description: { type: string, maxLength: 2000 }
+                lat: { type: number }
+                lng: { type: number }
+                address: { type: string }
+                reporterName: { type: string, maxLength: 100 }
+                reporterEmail: { type: string, format: email }
+                notifyOnUpdate: { type: boolean, default: false }
+                photos:
+                  type: array
+                  maxItems: 3
+                  items: { type: string, format: binary }
+      responses:
+        '201':
+          description: Meldung erfolgreich eingereicht
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportCreated' }
+        '400':
+          description: Validierungsfehler
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /reports/{id}:
+    get:
+      tags: [reports]
+      summary: Einzelne Meldung abrufen (öffentlich)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Meldungsdetails
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportPublic' }
+        '404':
+          description: Meldung nicht gefunden
+
+  /reports/track/{publicToken}:
+    get:
+      tags: [reports]
+      summary: Meldung per öffentlichem Token verfolgen
+      parameters:
+        - name: publicToken
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Meldungsstatus mit Timeline
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportTrack' }
+        '404':
+          description: Token nicht gefunden
+
+  /reports/nearby:
+    get:
+      tags: [reports]
+      summary: Ähnliche Meldungen in der Nähe (Duplikaterkennung)
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema: { type: number }
+        - name: lng
+          in: query
+          required: true
+          schema: { type: number }
+        - name: categoryId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: radius
+          in: query
+          schema: { type: integer, default: 100 }
+      responses:
+        '200':
+          description: Liste möglicher Duplikate
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ReportPublic' }
+
+  # ── PUBLIC: Categories ───────────────────────────────────────────
+  /categories:
+    get:
+      tags: [categories]
+      summary: Alle aktiven Kategorien abrufen
+      responses:
+        '200':
+          description: Liste der Kategorien
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Category' }
+
+  # ── AUTH: Citizen ────────────────────────────────────────────────
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: Bürger registrieren
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, name]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                name: { type: string }
+      responses:
+        '201':
+          description: Registrierung erfolgreich
+        '409':
+          description: E-Mail bereits registriert
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Bürger einloggen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Login erfolgreich
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken: { type: string }
+                  user: { $ref: '#/components/schemas/CitizenProfile' }
+        '401':
+          description: Ungültige Anmeldedaten
+
+  /auth/staff/login:
+    post:
+      tags: [auth]
+      summary: Mitarbeiter einloggen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Login erfolgreich
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken: { type: string }
+                  user: { $ref: '#/components/schemas/StaffProfile' }
+        '401':
+          description: Ungültige Anmeldedaten
+
+  # ── CITIZEN: My Reports ──────────────────────────────────────────
+  /citizen/reports:
+    get:
+      tags: [reports]
+      summary: Eigene Meldungen des eingeloggten Bürgers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste eigener Meldungen
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ReportWithHistory' }
+        '401':
+          description: Nicht autorisiert
+
+  # ── DASHBOARD: Staff ─────────────────────────────────────────────
+  /dashboard/reports:
+    get:
+      tags: [dashboard]
+      summary: Alle Meldungen (gefiltert) für Mitarbeiter
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: categoryId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: priority
+          in: query
+          schema: { type: string }
+        - name: assignedToId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: dateFrom
+          in: query
+          schema: { type: string, format: date }
+        - name: dateTo
+          in: query
+          schema: { type: string, format: date }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50 }
+        - name: sortBy
+          in: query
+          schema: { type: string, default: createdAt }
+        - name: sortDir
+          in: query
+          schema: { type: string, enum: [asc, desc], default: desc }
+      responses:
+        '200':
+          description: Gefilterte Meldungsliste
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ReportFull' }
+                  total: { type: integer }
+                  page: { type: integer }
+
+  /dashboard/reports/{id}/status:
+    patch:
+      tags: [dashboard]
+      summary: Status einer Meldung ändern
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [IN_PROGRESS, RESOLVED, REJECTED, PENDING_RESPONSE] }
+                note: { type: string, maxLength: 1000 }
+                sendEmail: { type: boolean, default: true }
+      responses:
+        '200':
+          description: Status erfolgreich geändert
+        '400':
+          description: Ungültiger Statusübergang
+
+  /dashboard/reports/{id}/assign:
+    patch:
+      tags: [dashboard]
+      summary: Meldung zuweisen
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assignedToId: { type: string, format: uuid, nullable: true }
+      responses:
+        '200':
+          description: Zuweisung erfolgreich
+
+  /dashboard/reports/{id}/comments:
+    post:
+      tags: [dashboard]
+      summary: Internen Kommentar hinzufügen
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text: { type: string, maxLength: 5000 }
+      responses:
+        '201':
+          description: Kommentar hinzugefügt
+
+  /dashboard/reports/bulk:
+    patch:
+      tags: [dashboard]
+      summary: Massenbearbeitung mehrerer Meldungen
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids, action]
+              properties:
+                ids:
+                  type: array
+                  items: { type: string, format: uuid }
+                action: { type: string, enum: [setStatus, setPriority, assign] }
+                value: { type: string }
+      responses:
+        '200':
+          description: Massenbearbeitung erfolgreich
+
+  /dashboard/stats:
+    get:
+      tags: [dashboard]
+      summary: KPI-Statistiken
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: dateFrom
+          in: query
+          schema: { type: string, format: date }
+        - name: dateTo
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Statistik-Übersicht
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Stats' }
+
+  /dashboard/reports/export:
+    get:
+      tags: [dashboard]
+      summary: Meldungen exportieren (CSV/Excel)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: format
+          in: query
+          schema: { type: string, enum: [csv, xlsx], default: csv }
+      responses:
+        '200':
+          description: Export-Datei
+          content:
+            text/csv:
+              schema: { type: string, format: binary }
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  # ── ADMIN ────────────────────────────────────────────────────────
+  /admin/categories:
+    get:
+      tags: [admin]
+      summary: Alle Kategorien (inkl. inaktive)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Vollständige Kategorieliste
+    post:
+      tags: [admin]
+      summary: Neue Kategorie anlegen
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CategoryInput' }
+      responses:
+        '201':
+          description: Kategorie erstellt
+
+  /admin/categories/{id}:
+    put:
+      tags: [admin]
+      summary: Kategorie aktualisieren
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CategoryInput' }
+      responses:
+        '200':
+          description: Kategorie aktualisiert
+
+  /admin/staff:
+    get:
+      tags: [admin]
+      summary: Alle Mitarbeiter
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Mitarbeiterliste
+    post:
+      tags: [admin]
+      summary: Neuen Mitarbeiter anlegen
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, name, role]
+              properties:
+                email: { type: string, format: email }
+                name: { type: string }
+                role: { type: string, enum: [STAFF, ADMIN] }
+                department: { type: string }
+      responses:
+        '201':
+          description: Mitarbeiter angelegt
+
+  /admin/config:
+    get:
+      tags: [admin]
+      summary: App-Konfiguration abrufen
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Konfigurationsobjekt
+    put:
+      tags: [admin]
+      summary: App-Konfiguration aktualisieren
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                city.name: { type: string }
+                city.primaryColor: { type: string, pattern: '^#[0-9A-Fa-f]{6}$' }
+                city.defaultLat: { type: number }
+                city.defaultLng: { type: number }
+                city.defaultZoom: { type: integer }
+      responses:
+        '200':
+          description: Konfiguration aktualisiert
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ReportPublic:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        categoryId: { type: string, format: uuid }
+        category: { $ref: '#/components/schemas/Category' }
+        description: { type: string, nullable: true }
+        status: { type: string }
+        lat: { type: number }
+        lng: { type: number }
+        address: { type: string, nullable: true }
+        photos: { type: array, items: { $ref: '#/components/schemas/PhotoPublic' } }
+        createdAt: { type: string, format: date-time }
+
+    ReportCreated:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        publicToken: { type: string, format: uuid }
+        status: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    ReportTrack:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        status: { type: string }
+        category: { $ref: '#/components/schemas/Category' }
+        createdAt: { type: string, format: date-time }
+        statusHistory:
+          type: array
+          items: { $ref: '#/components/schemas/StatusEntry' }
+
+    ReportFull:
+      allOf:
+        - $ref: '#/components/schemas/ReportPublic'
+        - type: object
+          properties:
+            reporterName: { type: string, nullable: true }
+            reporterEmail: { type: string, nullable: true }
+            priority: { type: string }
+            assignedTo: { $ref: '#/components/schemas/StaffProfile', nullable: true }
+            comments: { type: array, items: { $ref: '#/components/schemas/InternalComment' } }
+            statusHistory: { type: array, items: { $ref: '#/components/schemas/StatusEntry' } }
+
+    ReportWithHistory:
+      allOf:
+        - $ref: '#/components/schemas/ReportPublic'
+        - type: object
+          properties:
+            statusHistory: { type: array, items: { $ref: '#/components/schemas/StatusEntry' } }
+
+    Category:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        icon: { type: string }
+        color: { type: string }
+        responsibleDepartment: { type: string }
+        targetResolutionDays: { type: integer }
+
+    CategoryInput:
+      type: object
+      required: [name, icon, responsibleDepartment, targetResolutionDays]
+      properties:
+        name: { type: string, maxLength: 100 }
+        icon: { type: string }
+        color: { type: string, pattern: '^#[0-9A-Fa-f]{6}$' }
+        responsibleDepartment: { type: string }
+        targetResolutionDays: { type: integer, minimum: 1 }
+        isActive: { type: boolean, default: true }
+        sortOrder: { type: integer, default: 0 }
+
+    PhotoPublic:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        url: { type: string }
+
+    StatusEntry:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        fromStatus: { type: string, nullable: true }
+        toStatus: { type: string }
+        note: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    InternalComment:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        text: { type: string }
+        author: { $ref: '#/components/schemas/StaffProfile' }
+        createdAt: { type: string, format: date-time }
+
+    CitizenProfile:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string }
+        name: { type: string }
+
+    StaffProfile:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string }
+        name: { type: string }
+        role: { type: string }
+        department: { type: string, nullable: true }
+
+    Stats:
+      type: object
+      properties:
+        totalReports: { type: integer }
+        byStatus:
+          type: object
+          additionalProperties: { type: integer }
+        byCategory:
+          type: array
+          items:
+            type: object
+            properties:
+              categoryId: { type: string }
+              categoryName: { type: string }
+              count: { type: integer }
+        avgResolutionDays: { type: number }
+        openOverdue: { type: integer }
+
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+        message: { type: string }
+        details: { type: array, items: { type: string } }

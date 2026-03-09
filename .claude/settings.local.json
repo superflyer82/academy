@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init)",
+      "Bash(git remote add origin git@github.com:superflyer82/academy.git)",
+      "Bash(ssh -T git@github.com)",
+      "Bash(git remote set-url origin https://github.com/superflyer82/academy.git)",
+      "Bash(git ls-remote https://github.com/superflyer82/academy.git)",
+      "Bash(git remote set-url origin https://***TOKEN***@github.com/superflyer82/academy.git)",
+      "Bash(git fetch origin)",
+      "Bash(git checkout -b main --track origin/main)",
+      "Bash(git checkout main)",
+      "Bash(git pull origin main)",
+      "Bash(git rm -rf .)",
+      "Bash(git commit -m \"chore: clear repository content\")",
+      "Bash(git push origin main)",
+      "Bash(git config user.name \"superflyer82\")",
+      "Bash(git config user.email \"mzwcvd9x5n@privaterelay.appleid.com\")",
+      "WebFetch(domain:github.com)",
+      "Bash(uv --version)",
+      "Bash(uv tool install specify-cli --from git+https://github.com/github/spec-kit.git --python 3.11)",
+      "Bash(specify init maengelmelder --ai claude)",
+      "Bash(specify init maengelmelder --ai claude --ignore-agent-tools)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh --json --number 1 --short-name \"maengelmelder-platform\" \"Mängelmelder Musterhausen - Vollständige Plattform für Bürgermeldungen im öffentlichen Raum\")",
+      "Bash(.specify/scripts/bash/setup-plan.sh --json)",
+      "Bash(.specify/scripts/bash/update-agent-context.sh claude)",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh --json)",
+      "Bash(git add .claude/settings.local.json)",
+      "Bash(git commit --amend --no-edit)"
+    ]
+  }
+}
